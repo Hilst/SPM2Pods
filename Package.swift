@@ -3,12 +3,33 @@
 
 import PackageDescription
 
+let pckName = "SPM2Pods"
+let tName = "TestExecutable"
+let gen = "PodspecGen"
+
 let package = Package(
-    name: "SPM2Pods",
+	name: pckName,
+	platforms: [ .iOS(.v13), .macOS(.v13) ],
+	products: [
+		.executable(name: tName, targets: [tName]),
+		.plugin(name: pckName, targets: [pckName]),
+		.executable(name: gen, targets: [gen])
+	],
+	dependencies: [
+		.package(url: "https://github.com/swiftlang/swift-package-manager", branch: "main")
+	],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .executableTarget(
-            name: "SPM2Pods"),
+		.plugin(
+			name: pckName,
+			capability: .buildTool(),
+			dependencies: [.targetItem(name: gen, condition: .none)]
+		),
+		.executableTarget(
+			name: tName,
+			plugins: [.plugin(name: pckName)]),
+		.executableTarget(name: gen,
+						  dependencies: [
+							.productItem(name: "SwiftPMDataModel", package: "swift-package-manager", moduleAliases: nil, condition: .none),
+						  ]),
     ]
 )
